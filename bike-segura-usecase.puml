@@ -1,0 +1,89 @@
+@startuml SGPD_UseCase_Diagram
+!theme plain
+skinparam actorBackgroundColor #E1F5FF
+skinparam usecaseBackgroundColor #FFF9C4
+skinparam usecaseBorderColor #1976D2
+skinparam actorBorderColor #0D47A1
+skinparam packageBackgroundColor #F3E5F5
+skinparam packageBorderColor #7B1FA2
+
+title Sistema Bike Segura (SGPD)\nDiagrama de Casos de Uso
+
+left to right direction
+
+actor "👤 Cidadão\nProprietário" as CP
+actor "👮 Agente de\nSegurança" as AS
+actor "🔧 Administrador" as ADM
+actor "🌐 Gov.br" as GOV <<system>>
+
+package "Autenticação e Autorização" {
+    usecase "UC02: Autenticar\nUsuário" as UC02
+}
+
+package "Gestão de Bicicletas" {
+    usecase "UC01: Manter Cadastro\nde Bicicleta" as UC01
+    usecase "UC04: Consultar\nProcedência\n(QR/Série)" as UC04
+}
+
+package "Segurança e Alertas" {
+    usecase "UC03: Acionar Alerta\nde Furto" as UC03
+    usecase "UC05: Registrar\nRecuperação de\nBicicleta" as UC05
+    usecase "UC06: Visualizar\nMancha Criminal" as UC06
+}
+
+package "Notificações" {
+    usecase "UC08: Notificar\nUsuário" as UC08
+}
+
+package "Administração" {
+    usecase "UC07: Auditar Logs\nde Acesso" as UC07
+}
+
+CP --> UC02 : autentica
+CP --> UC01 : cadastra/atualiza
+CP --> UC03 : ativa alerta
+CP --> UC08 : recebe notificação
+
+AS --> UC02 : autentica
+AS --> UC04 : consulta
+AS --> UC05 : registra
+AS --> UC06 : monitora
+AS --> UC08 : recebe notificação
+
+ADM --> UC02 : autentica
+ADM --> UC07 : audita
+ADM --> UC06 : analisa
+
+UC02 --> GOV : <<include>>\nvalidação de identidade
+
+UC03 .up.|> UC02 : <<include>>\nrequer autenticação
+UC04 .up.|> UC02 : <<include>>\nrequer autenticação
+UC05 ..|> UC04 : <<include>>\nverifica procedência
+UC05 .down.|> UC08 : <<extend>>\nnotifica proprietário
+
+UC01 ..|> UC04 : <<extend>>\nserial/QR gerado
+
+note right of CP
+  • Registra bicicleta
+  • Ativa alerta em caso de furto
+  • Recebe notificações de recuperação
+end note
+
+note right of AS
+  • Verifica procedência
+  • Registra recuperação
+  • Monitora manchas criminais
+end note
+
+note right of ADM
+  • Gerencia permissões
+  • Audita todas as operações
+  • Analisa tendências de segurança
+end note
+
+note bottom of UC07
+  Rastreia acesso de todos os usuários
+  para conformidade LGPD
+end note
+
+@enduml
